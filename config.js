@@ -51,7 +51,7 @@ global.APIKeys = {
 /*Lolhuman*/
 global.lolkey = pickRandom(["043c5de3b7cd6b1b8f2a0f90", "e1a815979e6adfc071b7eafc", "ed78c137a46873c5b8e5fe3b", "IchanZX", "GataDios"])
 /*OpenAi*/
-global.openaikey = "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"
+global.openaikey = "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"
 /*AmeApi*/
 global.ameapikey = "1f98ec7e4842d057d7551722f83e9ae5c59896856aa3f96d406ff8fc9185752062920fadf1df1ea71c332d3f6be2dd6fa62b7ac3d0140e40d86ba0e736135820"
 /*XyroineeApi*/

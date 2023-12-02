@@ -174,7 +174,7 @@ let handler = async (m, {
                     "content": text
                 }],
             });
-            await m.reply("*Result:*\n\n" + chatCompletion.choices[0].message + "\n\n" + "*Made by:* " + "OPENAI")
+            await m.reply("*Result:*\n\n" + chatCompletion.choices[0].message.content + "\n\n" + "*Made by:* " + "OPENAI")
         } catch (e) {
             try {
                 let result = await azureGPT(text)

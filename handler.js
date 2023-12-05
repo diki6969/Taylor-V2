@@ -909,6 +909,7 @@ export async function handler(chatUpdate) {
                 if (!("premium" in chat)) chat.premium = false
                 if (!("premiumTime" in chat)) chat.premiumTime = false
                 if (!("premnsfw" in chat)) chat.premnsfw = false
+                if (!("rpg" in chat)) chat.rpg = false
                 if (!("sBye" in chat)) chat.sBye = ""
                 if (!("sDemote" in chat)) chat.sDemote = ""
                 if (!("simi" in chat)) chat.simi = false
@@ -937,6 +938,7 @@ export async function handler(chatUpdate) {
                     premium: false,
                     premiumTime: false,
                     premnsfw: false,
+                    rpg: false,
                     sBye: "",
                     sDemote: "",
                     simi: false,
@@ -1007,13 +1009,13 @@ export async function handler(chatUpdate) {
         }
         if (opts["nyimak"])
             return
-        if (!m.fromMe && opts["self"])
+        if (!m.fromMe && global.db.data.settings[this.user.jid].self && global.db.data.chats[m.chat].self && opts["self"])
             return
-        if (opts["pconly"] && m.chat.endsWith("g.us"))
+        if (opts["pconly"] && global.db.data.chats[m.chat].pconly && m.chat.endsWith("g.us"))
             return
-        if (opts["gconly"] && !m.chat.endsWith("g.us"))
+        if (opts["gconly"] && global.db.data.chats[m.chat].gconly && !m.chat.endsWith("g.us"))
             return
-        if (opts["swonly"] && m.chat !== "status@broadcast")
+        if (opts["swonly"] && global.db.data.chats[m.chat].swonly && m.chat !== "status@broadcast")
             return
         if (typeof m.text !== "string")
             m.text = ""
@@ -1077,6 +1079,11 @@ export async function handler(chatUpdate) {
             if (!opts["restrict"])
                 if (plugin.tags && plugin.tags.includes("admin")) {
                     // global.dfail("restrict", m, this)
+                    continue
+                }
+                if (global.db.data.chats[m.chat].rpg)
+                if (plugin.tags && plugin.tags.includes("rpg")) {
+                    global.dfail("rpg", m, this)
                     continue
                 }
             const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&")
@@ -1340,7 +1347,7 @@ export async function handler(chatUpdate) {
         } catch (e) {
             console.log(m, m.quoted, e)
         }
-        if (opts["autoread"])
+        if (opts["autoread"] || global.db.data.settings[this.user.jid].autoread || global.db.data.chats[m.chat].autoread)
             await this.chatRead(m.key).catch(() => {})
     }
 }
@@ -1354,7 +1361,7 @@ export async function participantsUpdate({
     participants,
     action
 }) {
-    if (opts["self"] || this.isInit) return;
+    if (opts["self"] || global.db.data.chats[id].self || this.isInit) return;
     if (global.db.data == null) await loadDatabase();
     const chat = global.db.data.chats[id] || {};
     const emoji = {
@@ -1466,6 +1473,7 @@ export async function groupsUpdate(groupsUpdate) {
     if (opts["self"]) return
     for (const groupUpdate of groupsUpdate) {
         const id = groupUpdate.id
+        if (global.db.data.chats[id].self) return
         if (!id) continue
         let chats = global.db.data.chats[id] || {}
         const emoji = {

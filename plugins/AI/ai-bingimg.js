@@ -1,7 +1,4 @@
-const BingImageCreator = await(await import('../../lib/ai/bing-image.js')).default;
-import {
-    randomUUID
-} from "crypto";
+const { BingImageCreator } = await(await import('../../lib/ai/bing-image.js'));
 
 const handler = async (m, {
 	conn,
@@ -18,13 +15,10 @@ const handler = async (m, {
 		throw 'Input teks atau reply teks!';
 	}
 
-	await conn.reply(m.chat, wait, m);
+	await m.reply(wait);
 	try {
-		const response = new BingImageCreator({
-			userToken: "1CBrGSpML0Fz8WQSDRzqWaeyL9zle6nYrZn6uCwVyEEO8Nqdcs4B2UGs-zBkYVeTjYmvveLcSvkWvDtPHVV8CtUt0l15dzoSU_ARtKpYzDes8WjEKQPjWX64ckraHm676gEcRMa2dVE_nGuCLpFvnkDBdzkO_Kfesi4LgVMDrucBRmOPrSOVYzqPJVFXtNIOLDlW5xOUUi3rS8ltxZfSoCQ"
-		});
-		const data = await response.genImageList(text, randomUUID(), true, true);
-
+		const res = new BingImageCreator({ cookie: "1CBrGSpML0Fz8WQSDRzqWaeyL9zle6nYrZn6uCwVyEEO8Nqdcs4B2UGs-zBkYVeTjYmvveLcSvkWvDtPHVV8CtUt0l15dzoSU_ARtKpYzDes8WjEKQPjWX64ckraHm676gEcRMa2dVE_nGuCLpFvnkDBdzkO_Kfesi4LgVMDrucBRmOPrSOVYzqPJVFXtNIOLDlW5xOUUi3rS8ltxZfSoCQ" });
+		const data = await res.createImage(text);
 		if (data.length > 0) {
 			for (let i = 0; i < data.length; i++) {
 				try {

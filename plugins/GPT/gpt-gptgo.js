@@ -1,5 +1,5 @@
-import cheerio from 'cheerio';
 import fetch from 'node-fetch';
+import { FormData } from 'formdata-node';
 
 let handler = async (m, {
     conn,
@@ -23,27 +23,37 @@ handler.command = /^(gptgo)$/i
 export default handler
 
 /* New Line */
-async function gptGo(query) {
-    const tokenResponse = await fetch(`https://gptgo.ai/action_get_token.php?q=${encodeURIComponent(query)}&hlgpt=default`, {
-        method: "GET",
-        headers: {
-            "Referer": "https://gptgo.ai/?hl=zh",
-            "origin": "https://gptgo.ai/",
-        }
-    });
-    const tokenData = await tokenResponse.json();
-    const gpttoken = tokenData.token;
+const gptGo = async (q) => {
+  try {
+  const formdata = new FormData();
+  formdata.append("ask", q.toString());
+  const headers = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+  "Accept": "*/*",
+  "Accept-language": "en-EN",
+  "Origin": "https://gptgo.ai",
+  "Referer": "https://gptgo.ai/",
+  "sec-ch-ua": '"Google Chrome";v="116", "Chromium";v="116", "Not?A_Brand";v="24"',
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": '"Linux"',
+  "Sec-Fetch-Dest": "empty",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Site": "same-origin",
+};
+  const requestOptions = {
+    method: "POST",
+    headers,
+    body: formdata,
+    redirect: "follow",
+  };
 
-    const response = await fetch(`https://gptgo.ai/action_ai_gpt.php?token=${gpttoken}`, {
-        method: "GET",
-        headers: {
-            "Referer": "https://gptgo.ai/?hl=zh",
-            "origin": "https://gptgo.ai/",
-            "accept": "text/event-stream"
-        }
-    });
-
-    const result = (await response.text())
+  const response = await fetch("https://gptgo.ai/get_token.php", requestOptions)
+  const result = await response.text()
+    const modifiedString = result.slice(0xa, -0x14);
+  const token = atob(modifiedString);
+  const response2 = await fetch(`https://api.gptgo.ai/web.php?array_chat=${token}`, requestOptions)
+  const decodedData = await response2.text()
+  const resultChat = decodedData
         .split('\n')
         .filter(line => line.trim() !== '')
         .map(line => line.replace('data: ', ''))
@@ -51,6 +61,9 @@ async function gptGo(query) {
         .map(item => JSON.parse(item))
         .map(v => v.choices[0].delta.content)
         .join('');
-
-    return result;
-}
+    return resultChat;
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    throw error;
+  }
+};

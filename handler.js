@@ -910,6 +910,7 @@ export async function handler(chatUpdate) {
                 if (!("premiumTime" in chat)) chat.premiumTime = false
                 if (!("premnsfw" in chat)) chat.premnsfw = false
                 if (!("rpg" in chat)) chat.rpg = false
+                if (!("self" in chat)) chat.self = false
                 if (!("sBye" in chat)) chat.sBye = ""
                 if (!("sDemote" in chat)) chat.sDemote = ""
                 if (!("simi" in chat)) chat.simi = false
@@ -939,6 +940,7 @@ export async function handler(chatUpdate) {
                     premiumTime: false,
                     premnsfw: false,
                     rpg: false,
+                    self: false,
                     sBye: "",
                     sDemote: "",
                     simi: false,
@@ -1081,11 +1083,7 @@ export async function handler(chatUpdate) {
                     // global.dfail("restrict", m, this)
                     continue
                 }
-                if (global.db.data.chats[m.chat].rpg)
-                if (plugin.tags && plugin.tags.includes("rpg")) {
-                    global.dfail("rpg", m, this)
-                    continue
-                }
+                
             const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&")
             let _prefix = plugin.customPrefix ? plugin.customPrefix : conn.prefix ? conn.prefix : global.prefix
             let match = (_prefix instanceof RegExp ? // RegExp Mode?
@@ -1208,6 +1206,12 @@ export async function handler(chatUpdate) {
                 if (plugin.register == true && _user.registered == false) { // Butuh daftar?
                     fail("unreg", m, this)
                     continue
+                }
+                if (!global.db.data.chats[m.chat].rpg) {
+                if (plugin.tags && plugin.tags.includes("rpg")) {
+                    fail("rpg", m, this)
+                    continue
+                }
                 }
                 m.isCommand = true
                 let xp = "exp" in plugin ? parseInt(plugin.exp) : 17 // XP Earning per command
@@ -1692,7 +1696,7 @@ ${userTag} RPG tidak aktif, Silahkan hubungi Team Bot Discussion Untuk mengaktif
         restrict: `*${emoji.restrict} ᴘᴇʀʜᴀᴛɪᴀɴ ᴛɪᴅᴀᴋ ᴀᴋᴛɪꜰ*\n
 ${userTag} Fitur ini di *disable* !`,
     } [type]
-    if (msg) return conn.reply(
+    if (msg) return await conn.reply(
         m.chat,
         msg,
         m, {

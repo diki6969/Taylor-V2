@@ -18,7 +18,7 @@ let handler = async (m, {
         let media = await q.download()
         let url = await uploadFile(media)
         let hasil = `https://api.xyroinee.xyz/api/others/toanime?url=${url}&apikey=${global.xyro}`
-        conn.sendFile(m.chat, await (await fetch(hasil)).buffer(), 'error.jpg', 'Nih Kak, Maaf Kalau Hasilnya Tidak Sesuai Keinginan', m)
+        conn.sendFile(m.chat, await (await fetch(hasil)).arrayBuffer(), 'error.jpg', 'Nih Kak, Maaf Kalau Hasilnya Tidak Sesuai Keinginan', m)
     } catch (e) {
         m.reply(eror)
     }

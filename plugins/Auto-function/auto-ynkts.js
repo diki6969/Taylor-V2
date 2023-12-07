@@ -17,7 +17,7 @@ export async function all(m) {
         if (TandaTanya && m.isGroup) {
             await this.sendMessage(m.chat, {
                 sticker: stc,
-                thumbnail: await (await fetch(pp)).buffer(),
+                thumbnail: await (await fetch(pp)).arrayBuffer(),
                 contextInfo: {
                     externalAdReply: {
                         showAdAttribution: true,
@@ -26,7 +26,7 @@ export async function all(m) {
                         title: '「 ❔ 」',
                         body: wm,
                         sourceUrl: 'http://github.com/AyGemuy',
-                        thumbnail: await (await fetch(pp)).buffer()
+                        thumbnail: await (await fetch(pp)).arrayBuffer()
                     }
                 }
             }, {

@@ -28,7 +28,7 @@ ${cmenuf}
                 mediaType: 2,
                 sourceUrl: sig,
                 mediaUrl: sig,
-                thumbnail: await (await fetch('https://telegra.ph/file/1836eec6c22d949829474.jpg')).buffer()
+                thumbnail: await (await fetch('https://telegra.ph/file/1836eec6c22d949829474.jpg')).arrayBuffer()
             }
         }
     })

@@ -54,7 +54,7 @@ let handler = async (m, {
             gust_mph,
             gust_kph
         } = res.data.current
-        let icon = await (await fetch('https:' + res.data.current.condition.icon)).buffer()
+        let icon = await (await fetch('https:' + res.data.current.condition.icon)).arrayBuffer()
         let caption = `
 *- - - - [ CONDITION ] - - -*
 ${res.data.current.condition.text}

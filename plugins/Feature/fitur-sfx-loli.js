@@ -176,7 +176,7 @@ let handler = async (m, {
                     description: wm,
                     title: '👋 Hai, ' + name + ' ' + ucapan,
                     body: botdate,
-                    thumbnail: await (await fetch(pp)).buffer(),
+                    thumbnail: await (await fetch(pp)).arrayBuffer(),
                     sourceUrl: sound
                 }
             }

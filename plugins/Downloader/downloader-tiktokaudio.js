@@ -30,7 +30,7 @@ let handler = async (m, {
                     body: 'Now Playing...',
                     description: 'Now Playing...',
                     mediaType: 2,
-                    thumbnail: await (await fetch('https://telegra.ph/file/9e323ad1f4b2d52579416.jpg')).buffer(),
+                    thumbnail: await (await fetch('https://telegra.ph/file/9e323ad1f4b2d52579416.jpg')).arrayBuffer(),
                     mediaUrl: sig
                 }
             }
@@ -69,7 +69,7 @@ ${spas}*[ A U D I O ]*
                     body: 'Now Playing...',
                     description: 'Now Playing...',
                     mediaType: 2,
-                    thumbnail: await (await fetch('https://telegra.ph/file/9e323ad1f4b2d52579416.jpg')).buffer(),
+                    thumbnail: await (await fetch('https://telegra.ph/file/9e323ad1f4b2d52579416.jpg')).arrayBuffer(),
                     mediaUrl: sig
                 }
             }

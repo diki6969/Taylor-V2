@@ -31,7 +31,7 @@ const handler = async (m, {
                     description: 'Deskripsi Anda',
                     title: `👋 Hai, ${name} ucapan`,
                     body: 'Botdate Anda',
-                    thumbnail: await fetch(pp).then(res => res.buffer()),
+                    thumbnail: await fetch(pp).then(res => res.arrayBuffer()),
                     sourceUrl: hasil.url,
                 },
             },

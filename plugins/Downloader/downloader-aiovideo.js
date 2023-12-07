@@ -23,7 +23,7 @@ let handler = async (m, {
             quality,
             formattedSize
         }
-        of medias) await conn.sendFile(m.chat, await (await fetch(url)).buffer(), '', `*AIOVIDEO DOWNLOADER*\n\n${title ? `*Title:* ${title}` : "NotFound"}\n*💽Format:* ${quality ? `${quality}` : "Unknown"}\n*📨Size:* ${formattedSize ? `${formattedSize}` : "countless" }\n`, m)
+        of medias) await conn.sendFile(m.chat, await (await fetch(url)).arrayBuffer(), '', `*AIOVIDEO DOWNLOADER*\n\n${title ? `*Title:* ${title}` : "NotFound"}\n*💽Format:* ${quality ? `${quality}` : "Unknown"}\n*📨Size:* ${formattedSize ? `${formattedSize}` : "countless" }\n`, m)
 }
 handler.help = ['aiovideo2'].map(v => v + ' <url>')
 handler.tags = ['downloader']

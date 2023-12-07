@@ -21,7 +21,7 @@ let handler = async (m, {
             of anuku)
             conn.sendMedia(m.chat, url, null, {
                 mentions: [m.sender],
-                jpegThumbnail: await (await fetch(preview)).buffer(),
+                jpegThumbnail: await (await fetch(preview)).arrayBuffer(),
                 caption: `🚀 *Link:* ${await(await axios.get(`https://tinyurl.com/api-create.php?url=${url}`)).data}`
             })
     } catch {
@@ -37,7 +37,7 @@ let handler = async (m, {
                 of res2)
                 conn.sendMedia(m.chat, url, null, {
                     mentions: [m.sender],
-                    jpegThumbnail: await (await fetch(preview)).buffer(),
+                    jpegThumbnail: await (await fetch(preview)).arrayBuffer(),
                     caption: `🚀 *Link:* ${await(await axios.get(`https://tinyurl.com/api-create.php?url=${url}`)).data}`
                 })
         } catch {

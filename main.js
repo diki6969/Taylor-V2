@@ -522,12 +522,15 @@ async function connectionUpdate(update) {
 *Time:* ${currentTime.toLocaleTimeString()}
 *Day:* ${currentTime.toLocaleDateString('id-ID', { weekday: 'long' })}
 *Description:* Bot ${name || 'Taylor'} is now active.`;
-        await conn.sendMessage(nomorown + "@s.whatsapp.net", {
-            text: infoMsg,
-            mentions: [nomorown + "@s.whatsapp.net", jid]
-        }, {
-            quoted: null
-        })
+        await conn.reply(
+                nomorown + "@s.whatsapp.net",
+                infoMsg,
+                m, {
+                    contextInfo: {
+                        mentionedJid: [nomorown + "@s.whatsapp.net", jid]
+                    },
+                }
+            );
         conn.logger.info(chalk.yellow('\n🚩 R E A D Y'));
     }
     if (isOnline == true) {
@@ -676,15 +679,11 @@ async function filesInit() {
             }
         }
 
-        await conn.sendMessage(nomorown + "@s.whatsapp.net", {
-            text: "*Loaded Plugins Report:*\n" +
+        await conn.reply(nomorown + "@s.whatsapp.net", "*Loaded Plugins Report:*\n" +
                 "\n*Total Plugins:* " + CommandsFiles.length +
                 "\n*Success:* " + successMessages.length +
                 "\n*Error:* " + errorMessages.length +
-                "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n')
-        }, {
-            quoted: null
-        });
+                "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n'), null);
 
         conn.logger.warn("Loaded " + CommandsFiles.length + " JS Files total.");
         conn.logger.info("✅ Success Plugins:\n" + successMessages.length + " total.");

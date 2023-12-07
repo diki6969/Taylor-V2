@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 let wibu = flaaa.getRandom()
-let thumb = await (await fetch(wibu + 'Shop')).buffer()
+let thumb = await (await fetch(wibu + 'Shop')).arrayBuffer()
 const potion = 500
 const Sgold = 3000
 const Bgold = 6000

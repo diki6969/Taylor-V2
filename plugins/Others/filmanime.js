@@ -29,7 +29,7 @@ let handler = async (m, {
 *date_release:* ${x.date_release}
 *language:* ${x.language}
 *link_dl:* ${x.link_dl}`
-    await conn.sendFile(m.chat, await (await fetch(x.thumbnail)).buffer(), '', hasil, m)
+    await conn.sendFile(m.chat, await (await fetch(x.thumbnail)).arrayBuffer(), '', hasil, m)
 }
 handler.help = ['filmanime'].map(v => v + '<film>')
 handler.tags = ['internet', 'anime']

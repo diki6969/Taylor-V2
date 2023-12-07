@@ -23,7 +23,7 @@ ${pickRandom(global.bacot)}
         document: {
             url: thumb
         },
-        jpegThumbnail: await (await fetch(thumb)).buffer(),
+        jpegThumbnail: await (await fetch(thumb)).arrayBuffer(),
         fileName: '─────〔 𝗕𝗔𝗖𝗢𝗧 〕─────',
         mimetype: dpdf,
         fileLength: fsizedoc,

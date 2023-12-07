@@ -118,7 +118,7 @@ let handler = async (m, {
 • 259237855 Laughing`
     let res = await fetch(`https://api.imgflip.com/caption_image?template_id=${thm}&username=Wudysoft&password=Wudysoft&text0=${text1}&text1=${text2}`)
     let x = await res.json()
-    await conn.sendFile(m.chat, await (await fetch(x.data.url)).buffer(), '', `Result from *${command}*`, m)
+    await conn.sendFile(m.chat, await (await fetch(x.data.url)).arrayBuffer(), '', `Result from *${command}*`, m)
 }
 handler.command = /^(memaker)$/i
 

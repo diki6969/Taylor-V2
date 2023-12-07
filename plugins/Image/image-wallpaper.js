@@ -111,7 +111,7 @@ let handler = async (m, {
     if (!text) return conn.sendList(m.chat, htki + " 📺 Models 🔎 " + htka, `⚡ Silakan pilih Model di tombol di bawah...\n*Teks yang anda kirim:* ${text}\n\nKetik ulang *${usedPrefix + command}* teks anda untuk mengubah teks lagi`, author, "☂️ M O D E L ☂️", listSections, m)
     const res = await (/2/.test(command) ? wallpaper : wallpaper)(text)
     const img = res[Math.floor(Math.random() * res.length)]
-    await conn.sendFile(m.chat, await (await fetch(img)).buffer(), '', `Result from *${text}*`, m)
+    await conn.sendFile(m.chat, await (await fetch(img)).arrayBuffer(), '', `Result from *${text}*`, m)
 }
 handler.help = ['', '2'].map(v => 'wallpaper' + v + ' <query>')
 handler.tags = ['downloader']

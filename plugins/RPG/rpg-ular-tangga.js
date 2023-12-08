@@ -316,7 +316,7 @@ const handler = async (m, {
 			break;
 
 		case 'help':
-			await m.reply(`🎲🐍 *Permainan Ular Tangga* 🐍🎲\n\n*Commands:*\n- ${usedPrefix + command} join : Bergabung ke dalam permainan.\n- ${usedPrefix + command} start : Memulai permainan.\n- ${usedPrefix + command} roll : Melempar dadu untuk bergerak.\n- ${usedPrefix + command} reset : Mereset sesi permainan.`);
+			await m.reply(`🎲🐍 *Permainan Ular Tangga* 🐍🎲\n\n*Commands:*\n- *${usedPrefix + command} join :* Bergabung ke dalam permainan.\n- *${usedPrefix + command} start :* Memulai permainan.\n- *${usedPrefix + command} roll :* Melempar dadu untuk bergerak.\n- *${usedPrefix + command} reset :* Mereset sesi permainan.`);
 			break;
 
 		default:

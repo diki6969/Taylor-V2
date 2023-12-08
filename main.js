@@ -525,7 +525,7 @@ async function connectionUpdate(update) {
         await conn.reply(
                 nomorown + "@s.whatsapp.net",
                 infoMsg,
-                m, {
+                null, {
                     contextInfo: {
                         mentionedJid: [nomorown + "@s.whatsapp.net", jid]
                     },

@@ -17,6 +17,7 @@ const handler = async (m, {
 
     const isEnable = !/false|disable|(turn)?off|0/i.test(command);
     const chat = global.db.data.chats[m.chat];
+    const _chat = global.db.data.settings[conn.user.jid];
 
     const input = args[0];
     const isNumber = !isNaN(input);
@@ -33,6 +34,8 @@ const handler = async (m, {
         if (["autoChat"].includes(featureName)) {
             conn.autochat = conn.autochat || {};
             conn.autochat.status = isEnable;
+        } else if (["self", "pconly", "gconly", "swonly", "rpg", "autoread", "jadibot", "restrict", "autorestart", "autorestart"].includes(featureName)) {
+            _chat[featureName] = isEnable;
         } else {
             chat[featureName] = isEnable;
         }

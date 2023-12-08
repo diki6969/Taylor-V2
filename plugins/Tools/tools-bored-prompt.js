@@ -1,8 +1,6 @@
 import fetch from "node-fetch"
-import uploadImage from "../../lib/uploadImage.js"
 import {
-    FormData,
-    Blob
+    FormData
 } from 'formdata-node';
 
 let handler = async (m, {
@@ -19,35 +17,31 @@ let handler = async (m, {
         } else if (m.quoted && m.quoted.text) {
             text = m.quoted.text
         } else return m.reply("Input Teks")
-        let q = m.quoted ? m.quoted : m
-        let mime = (q.msg || q).mimetype || ""
         await m.reply(wait)
-        if (!mime) return m.reply("Input Foto")
-        let media = await q.download()
-        let isTele = /image\/(png|jpe?g)/.test(mime)
-        let link = await uploadImage(media)
-        let result = await WhatImage(link, text)
+        let result = await PromptMaker(text)
         if (!result) {
             throw 'Terjadi kesalahan saat mengonversi gambar ke zombie.';
         }
-        await m.reply(result.output);
+        let list = result.output.map((chat, index) => {
+            return `*[ ${index + 1} ]*\n*Title:* ${chat.title || ''}\n*Prompt:* ${chat.prompt || ''}`;
+        }).join('\n\n');
+        await m.reply(`📺 Prompt List:\n\n${list}`);
     } catch (error) {
         console.error('Error:', error);
         throw error;
     }
 }
-handler.help = ["boredchatimg"].map(v => v + " (Balas foto)");
+handler.help = ["boredprompt"].map(v => v + " (Input teks)");
 handler.tags = ["tools"];
-handler.command = /^(boredchatimg)$/i;
+handler.command = /^(boredprompt)$/i;
 handler.limit = true;
 export default handler;
 
-async function WhatImage(image, prompt) {
+async function PromptMaker(prompt) {
     try {
         let form = new FormData();
         form.append('prompt', encodeURIComponent(prompt));
-        form.append('image', encodeURIComponent(image));
-        const response = await fetch("https://boredhumans.com/api_image_chat.php", {
+        const response = await fetch("https://boredhumans.com/prompts_api.php", {
             method: 'POST',
             body: form,
         });

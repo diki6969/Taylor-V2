@@ -1,55 +1,75 @@
 import {
     sticker
-} from '../../lib/sticker.js'
-import axios from 'axios'
+} from '../../lib/sticker.js';
+import axios from 'axios';
 
 let handler = async (m, {
     conn,
-    args,
+    text,
     usedPrefix,
     command
 }) => {
-    let text
-    if (args.length >= 1) {
-        text = args.slice(0).join(" ")
-    } else if (m.quoted && m.quoted.text) {
-        text = m.quoted.text
-    } else throw "Input teks atau reply teks yang ingin di jadikan quote!"
-    await m.reply(wait)
+    let reply;
 
-    let pp = await conn.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/a2ae6cbfa40f6eeea0cf1.jpg')
+    try {
+        if (text && m.quoted) {
+            if (m.quoted.text || m.quoted.sender) {
+                reply = {
+                    "name": await conn.getName(m.quoted.sender),
+                    "text": m.quoted.text || '',
+                    "chatId": m.chat.split('@')[0],
+                };
+            }
+        } else if (text && !m.quoted) {
+            reply = {};
+        } else if (!text && m.quoted) {
+            if (m.quoted.text) {
+                text = m.quoted.text || '';
+            }
+            reply = {};
+        } else {
+            throw "Input teks atau reply teks yang ingin dijadikan quote!";
+        }
 
-    const obj = {
-        "type": "quote",
-        "format": "png",
-        "backgroundColor": getRandomHexColor().toString(),
-        "width": 512,
-        "height": 768,
-        "scale": 2,
-        "messages": [{
-            "entities": [],
-            "avatar": true,
-            "from": {
-                "id": 1,
-                "name": m.name,
-                "photo": {
-                    "url": pp
-                }
-            },
-            "text": text,
-            "replyMessage": {}
-        }]
+        await m.reply(wait);
+
+        let pp = await conn.profilePictureUrl(m.sender, 'image').catch(_ => 'https://telegra.ph/file/a2ae6cbfa40f6eeea0cf1.jpg');
+
+        const obj = {
+            "type": "quote",
+            "format": "png",
+            "backgroundColor": getRandomHexColor().toString(),
+            "width": 512,
+            "height": 768,
+            "scale": 2,
+            "messages": [{
+                "entities": [],
+                "avatar": true,
+                "from": {
+                    "chatId": m.chat.split('@')[0],
+                    "name": m.name,
+                    "photo": {
+                        "url": pp
+                    }
+                },
+                "text": text,
+                "replyMessage": reply
+            }]
+        };
+
+        const buffer = await Quotly(obj);
+        let stiker = await sticker(buffer, false, global.packname, global.author);
+        if (stiker) return conn.sendFile(m.chat, stiker, 'Quotly.webp', '', m);
+    } catch (error) {
+        console.error(error);
+        return m.reply("Terjadi kesalahan dalam menjalankan perintah.");
     }
+};
 
-    const buffer = await Quotly(obj)
-    let stiker = await sticker(buffer, false, global.packname, global.author)
-    if (stiker) return conn.sendFile(m.chat, stiker, 'Quotly.webp', '', m)
-}
-
-handler.help = ['qc']
-handler.tags = ['sticker']
-handler.command = /^(qc)$/i
-export default handler
+handler.help = ['qc'];
+handler.tags = ['sticker'];
+handler.command = /^(qc)$/i;
+export default handler;
 
 async function Quotly(obj) {
     let json;
@@ -94,5 +114,6 @@ async function Quotly(obj) {
 }
 
 function getRandomHexColor() {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+    const randomColor = () => Math.floor(Math.random() * 200).toString(16).padStart(2, "0");
+    return `#${randomColor()}${randomColor()}${randomColor()}`;
 }

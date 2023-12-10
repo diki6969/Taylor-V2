@@ -15,7 +15,7 @@ let handler = async (m, {
     await m.reply(wait)
     const messages = [{
             role: 'system',
-            content: 'You are a helpful assistant.'
+            content: 'Kamu adalah asisten AI yang siap membantu segala hal.'
         },
         {
             role: 'user',

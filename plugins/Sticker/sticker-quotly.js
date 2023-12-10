@@ -6,18 +6,31 @@ import wibusoft from "wibusoft"
 
 let handler = async (m, {
     conn,
-    args,
+    text,
     usedPrefix,
     command
 }) => {
     let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     let name = await conn.getName(who)
-    let text
-    if (args.length >= 1) {
-        text = args.slice(0).join(" ")
-    } else if (m.quoted && m.quoted.text) {
-        text = m.quoted.text
-    } else throw "Input teks atau reply teks yang ingin di jadikan quote!"
+    let reply
+    if (text && m.quoted) {
+        if (m.quoted.text || m.quoted.sender) {
+            reply = {
+                "name": await conn.getName(m.quoted.sender),
+                "text": m.quoted.text || '',
+                "chatId": m.chat.split('@')[0],
+            };
+        }
+    } else if (text && !m.quoted) {
+        reply = {};
+    } else if (!text && m.quoted) {
+        if (m.quoted.text) {
+            text = m.quoted.text || '';
+        }
+        reply = {};
+    } else {
+        throw "Input teks atau reply teks yang ingin dijadikan quote!";
+    }
 
     await m.reply(wait)
     let pp = await conn.profilePictureUrl(m.sender, "image").catch(_ => logo)
@@ -31,7 +44,7 @@ let handler = async (m, {
     if (command == "quotlyv3") {
         temas = "random"
     }
-    let result = await Quotly(name, pp, text, temas)
+    let result = await Quotly(name, pp, text, temas, reply)
     try {
         let out = await wibusoft.tools.makeSticker(result, {
             author: packname,
@@ -51,7 +64,7 @@ handler.command = ["quotly", "quotlyv2", "quotlyv3"]
 
 export default handler
 
-async function Quotly(a, b, c, d) {
+async function Quotly(a, b, c, d, reply) {
     let obj;
 
     if (d == "terang") {
@@ -73,7 +86,7 @@ async function Quotly(a, b, c, d) {
                     }
                 },
                 text: c,
-                replyMessage: {}
+                replyMessage: reply
             }]
         };
     } else if (d == "random") {
@@ -95,7 +108,7 @@ async function Quotly(a, b, c, d) {
                     }
                 },
                 text: c,
-                replyMessage: {}
+                replyMessage: reply
             }]
         };
     } else if (d == "gelap") {
@@ -117,7 +130,7 @@ async function Quotly(a, b, c, d) {
                     }
                 },
                 text: c,
-                replyMessage: {}
+                replyMessage: reply
             }]
         };
     }
@@ -164,5 +177,6 @@ async function Quotly(a, b, c, d) {
 }
 
 function getRandomHexColor() {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+    const randomColor = () => Math.floor(Math.random() * 200).toString(16).padStart(2, "0");
+    return `#${randomColor()}${randomColor()}${randomColor()}`;
 }

@@ -33,6 +33,25 @@ let handler = async (m, {
     let name = await conn.getName(who)
 
     let pp = await conn.profilePictureUrl(m.sender, "image").catch(_ => logo)
+    let reply
+    if (text && m.quoted) {
+        if (m.quoted.caption || m.quoted.sender) {
+            reply = {
+                "name": await conn.getName(m.quoted.sender),
+                "text": m.quoted.caption || '',
+                "chatId": m.chat.split('@')[0],
+            };
+        }
+    } else if (text && !m.quoted) {
+        reply = {};
+    } else if (!text && m.quoted) {
+        if (m.quoted.caption) {
+            text = m.quoted.caption || '';
+        }
+        reply = {};
+    } else {
+        throw "Input teks atau reply teks yang ingin dijadikan quote!";
+    }
     let temas
     if (command == "quotlyimg") {
         temas = "terang"
@@ -75,7 +94,7 @@ handler.command = ["quotlyimg", "quotlyimgv2", "quotlyimgv3"]
 
 export default handler
 
-async function QuotlyImg(a, b, c, d, tema) {
+async function QuotlyImg(a, b, c, d, tema, reply) {
     var obj
     if (tema == "gelap") {
         obj = {
@@ -99,7 +118,7 @@ async function QuotlyImg(a, b, c, d, tema) {
                     }
                 },
                 "text": d,
-                "replyMessage": {}
+                "replyMessage": reply
             }]
         }
     }
@@ -125,7 +144,7 @@ async function QuotlyImg(a, b, c, d, tema) {
                     }
                 },
                 "text": d,
-                "replyMessage": {}
+                "replyMessage": reply
             }]
         }
     }
@@ -151,7 +170,7 @@ async function QuotlyImg(a, b, c, d, tema) {
                     }
                 },
                 "text": d,
-                "replyMessage": {}
+                "replyMessage": reply
             }]
         }
     }
@@ -221,5 +240,6 @@ async function createStickerV(img, url, packName, authorName, quality) {
 }
 
 function getRandomHexColor() {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+    const randomColor = () => Math.floor(Math.random() * 200).toString(16).padStart(2, "0");
+    return `#${randomColor()}${randomColor()}${randomColor()}`;
 }

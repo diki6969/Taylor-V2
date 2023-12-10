@@ -39,7 +39,8 @@ import {
 import fs from 'fs/promises';
 import yargs from 'yargs';
 import {
-    spawn
+    spawn,
+    exec
 } from 'child_process';
 import lodash from 'lodash';
 import chalk from 'chalk';
@@ -387,98 +388,131 @@ if (!opts['test']) {
 if (opts['server'])(await import('./server.js')).default(global.conn, PORT);
 
 async function clearTmp() {
-    const tmp = [tmpdir(), join(__dirname, "./tmp")];
-    const filename = [];
-    tmp.forEach((dirname) =>
-        readdirSync(dirname).forEach((file) => filename.push(join(dirname, file)))
-    );
-    return filename.map((file) => {
-        const stats = statSync(file);
-        if (
-            filename.length >= 1 &&
-            stats.isFile() &&
-            Date.now() - stats.mtimeMs >= 1000 * 60 * 3
-        ) {
-            return unlinkSync(file); // 3 minutes
-            console.log(chalk.cyanBright("Successfully clear tmp"));
-        }
-        return false;
-    });
-}
-
-function clearSessions(folder = "TaylorSession") {
-    let filename = [];
-    readdirSync(folder).forEach((file) => filename.push(join(folder, file)));
-    return filename.map((file) => {
-        let stats = statSync(file);
-        if (stats.isFile() && Date.now() - stats.mtimeMs >= 1000 * 60 * 120) {
-            // 1 hours
-            console.log("Deleted sessions", file);
-            return unlinkSync(file);
-        }
-        return false;
-    });
-}
-
-function purgeSession() {
-    let prekey = [];
-    const directorio = readdirSync('./TaylorSession');
-    const filesFolderPreKeys = directorio.filter((file) => {
-        return file.startsWith('pre-key-');
-    });
-    prekey = [...prekey, ...filesFolderPreKeys];
-    filesFolderPreKeys.forEach((files) => {
-        unlinkSync(`./TaylorSession/${files}`);
-    });
-}
-
-function purgeSessionSB() {
-    const folderPath = './jadibot';
-    if (!existsSync(folderPath)) {
-        mkdirSync(folderPath);
-        conn.logger.info('\nFolder jadibot berhasil dibuat.');
+    try {
+        const tmp = [tmpdir(), join(__dirname, "./tmp")];
+        const filename = tmp.flatMap((dirname) =>
+            readdirSync(dirname).filter((file) => {
+                try {
+                    const stats = statSync(join(dirname, file));
+                    return stats.isFile() && Date.now() - stats.mtimeMs >= 1000 * 60 * 3;
+                } catch (err) {
+                    console.error(`Error reading stats for ${file}: ${err.message}`);
+                    return false;
+                }
+            }).map((file) => {
+                try {
+                    unlinkSync(join(dirname, file));
+                    console.log(chalk.cyanBright("Successfully clear tmp"));
+                    return join(dirname, file);
+                } catch (err) {
+                    console.error(`Error unlinking ${file}: ${err.message}`);
+                    return null;
+                }
+            })
+        );
+        return filename.filter((file) => file !== null);
+    } catch (err) {
+        console.error(`Error in clearTmp: ${err.message}`);
+        return [];
     }
-    const listaDirectorios = readdirSync('./jadibot/');
-    let SBprekey = [];
-    listaDirectorios.forEach((filesInDir) => {
-        const directorio = readdirSync(`./jadibot/${filesInDir}`);
-        const DSBPreKeys = directorio.filter((fileInDir) => {
-            return fileInDir.startsWith('pre-key-');
-        });
-        SBprekey = [...SBprekey, ...DSBPreKeys];
-        DSBPreKeys.forEach((fileInDir) => {
-            unlinkSync(`./jadibot/${filesInDir}/${fileInDir}`);
-        });
-    });
 }
 
-function purgeOldFiles() {
-    const folderPath = './jadibot';
-    if (!existsSync(folderPath)) {
-        mkdirSync(folderPath);
-        conn.logger.info('\nFolder jadibot berhasil dibuat.');
+async function clearSessions(folder = "TaylorSession") {
+    try {
+        const filename = readdirSync(folder).filter((file) => {
+            try {
+                const stats = statSync(join(folder, file));
+                return stats.isFile() && Date.now() - stats.mtimeMs >= 1000 * 60 * 120;
+            } catch (err) {
+                console.error(`Error reading stats for ${file}: ${err.message}`);
+                return false;
+            }
+        }).map((file) => {
+            try {
+                unlinkSync(join(folder, file));
+                console.log("Deleted sessions", join(folder, file));
+                return join(folder, file);
+            } catch (err) {
+                console.error(`Error unlinking ${file}: ${err.message}`);
+                return null;
+            }
+        });
+        return filename.filter((file) => file !== null);
+    } catch (err) {
+        console.error(`Error in clearSessions: ${err.message}`);
+        return [];
     }
-    const directories = ['./TaylorSession/', './jadibot/'];
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    directories.forEach((dir) => {
-        readdirSync(dir, (err, files) => {
-            if (err) throw err;
-            files.forEach((file) => {
-                const filePath = path.join(dir, file);
-                stat(filePath, (err, stats) => {
-                    if (err) throw err;
+}
+
+async function purgeSession() {
+    try {
+        const prekeyFolder = './TaylorSession';
+        const prekeyFiles = readdirSync(prekeyFolder).filter((file) => file.startsWith('pre-key-'));
+        prekeyFiles.forEach((file) => {
+            try {
+                unlinkSync(join(prekeyFolder, file));
+            } catch (err) {
+                console.error(`Error unlinking ${file}: ${err.message}`);
+            }
+        });
+    } catch (err) {
+        console.error(`Error in purgeSession: ${err.message}`);
+    }
+}
+
+async function purgeSessionSB() {
+    try {
+        const directories = ['./TaylorSession/', './jadibot/'];
+        directories.forEach((folderPath) => {
+            try {
+                if (!existsSync(folderPath)) {
+                    mkdirSync(folderPath);
+                    conn.logger.info(`\nFolder ${folderPath} berhasil dibuat.`);
+                }
+                const listaDirectorios = readdirSync(folderPath);
+                listaDirectorios.forEach((filesInDir) => {
+                    const dirPath = join(folderPath, filesInDir);
+                    const SBprekeyFiles = readdirSync(dirPath).filter((fileInDir) => fileInDir.startsWith('pre-key-'));
+                    SBprekeyFiles.forEach((fileInDir) => {
+                        try {
+                            unlinkSync(join(dirPath, fileInDir));
+                        } catch (err) {
+                            console.error(`Error unlinking ${fileInDir}: ${err.message}`);
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error(`Error in purgeSessionSB: ${err.message}`);
+            }
+        });
+    } catch (err) {
+        console.error(`Error in purgeSessionSB: ${err.message}`);
+    }
+}
+
+async function purgeOldFiles() {
+    try {
+        const directories = ['./TaylorSession/', './jadibot/'];
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+        directories.forEach((dir) => {
+            readdirSync(dir).forEach((file) => {
+                try {
+                    const filePath = join(dir, file);
+                    const stats = statSync(filePath);
                     if (stats.isFile() && stats.mtimeMs < oneHourAgo && file !== 'creds.json') {
-                        unlinkSync(filePath, (err) => {
-                            if (err) throw err;
-                            conn.logger.info(`\nBerkas ${file} berhasil dihapus`);
-                        });
+                        unlinkSync(filePath);
+                        conn.logger.info(`\nBerkas ${file} berhasil dihapus`);
                     } else {
                         conn.logger.warn(`\nBerkas ${file} tidak dihapus`);
                     }
-                });
+                } catch (err) {
+                    console.error(`Error processing ${file}: ${err.message}`);
+                }
             });
         });
-    });
+    } catch (err) {
+        console.error(`Error in purgeOldFiles: ${err.message}`);
+    }
 }
 
 async function connectionUpdate(update) {
@@ -497,9 +531,7 @@ async function connectionUpdate(update) {
         conn.logger.info(await global.reloadHandler(true).catch(console.error));
     }
     if (global.db.data == null) loadDatabase();
-    if (!pairingCode && !useMobile && useQr && qr != 0 && qr != undefined) {
-        conn.logger.info(chalk.yellow('\n🚩ㅤPindai kode QR ini, kode QR akan kedaluwarsa dalam 60 detik.'));
-    }
+
     if (connection === "connecting") {
         console.log(
             chalk.redBright("⚡ Mengaktifkan Bot, Mohon tunggu sebentar...")
@@ -523,14 +555,14 @@ async function connectionUpdate(update) {
 *Day:* ${currentTime.toLocaleDateString('id-ID', { weekday: 'long' })}
 *Description:* Bot ${name || 'Taylor'} is now active.`;
         await conn.reply(
-                nomorown + "@s.whatsapp.net",
-                infoMsg,
-                null, {
-                    contextInfo: {
-                        mentionedJid: [nomorown + "@s.whatsapp.net", jid]
-                    },
-                }
-            );
+            nomorown + "@s.whatsapp.net",
+            infoMsg,
+            null, {
+                contextInfo: {
+                    mentionedJid: [nomorown + "@s.whatsapp.net", jid]
+                },
+            }
+        );
         conn.logger.info(chalk.yellow('\n🚩 R E A D Y'));
     }
     if (isOnline == true) {
@@ -542,26 +574,61 @@ async function connectionUpdate(update) {
     if (receivedPendingNotifications) {
         conn.logger.warn(chalk.yellow("Menunggu Pesan Baru"));
     }
-    if (connection == 'close') {
+    if (!pairingCode && !useMobile && !useQr && qr !== 0 && qr !== undefined && connection === "close") {
         conn.logger.error(chalk.yellow(`\n🚩 Koneksi ditutup, harap hapus folder ${global.authFile} dan pindai ulang kode QR`));
+        // Kill previous processes and restart
+        const killAndRestart = async (killCommand, restartCommand) => {
+            try {
+                await exec(killCommand);
+                const {
+                    stdout
+                } = await exec(restartCommand);
+                console.log(`Restarted successfully: ${stdout}`);
+            } catch (err) {
+                console.error(`Error: ${err.message}`);
+            }
+        };
+
+        killAndRestart('pkill -f "node index.js"', `node index.js ${process.argv.slice(2).join(' ')}`);
+    }
+    if (!pairingCode && !useMobile && useQr && qr !== 0 && qr !== undefined && connection === "close") {
+        conn.logger.info(chalk.yellow('\n🚩ㅤPindai kode QR ini, kode QR akan kedaluwarsa dalam 60 detik.'));
+        // Kill previous processes and restart
+        const killAndRestart = async (killCommand, restartCommand) => {
+            try {
+                await exec(killCommand);
+                const {
+                    stdout
+                } = await exec(restartCommand);
+                console.log(`Restarted successfully: ${stdout}`);
+            } catch (err) {
+                console.error(`Error: ${err.message}`);
+            }
+        };
+
+        killAndRestart('pkill -f "node index.js"', `node index.js ${process.argv.slice(2).join(' ')}`);
     }
 }
 
-process.on("unhandledRejection", (reason, p) => {
-    console.log(" [AntiCrash] :: Unhandled Rejection/Catch");
-    console.log(reason, p);
-});
-process.on("uncaughtException", (err, origin) => {
-    console.log(" [AntiCrash] :: Uncaught Exception/Catch");
-    console.log(err, origin);
-});
-process.on("uncaughtExceptionMonitor", (err, origin) => {
-    console.log(" [AntiCrash] :: Uncaught Exception/Catch (MONITOR)");
-    console.log(err, origin);
-});
-process.on("multipleResolves", () => {
-    null;
-});
+const logError = (eventType, message, details) => {
+    console.error(`[AntiCrash] :: ${eventType}\n${message}:`, details);
+};
+
+const handleMultipleResolves = (type, promise, reason) => {
+    if (!handleMultipleResolves.warned) {
+        logError("Multiple Resolves", "Type", type);
+        console.warn("Promise:", promise);
+        console.warn("Reason:", reason);
+        handleMultipleResolves.warned = true;
+    }
+};
+
+process.on("unhandledRejection", (reason, p) => logError("Unhandled Rejection/Catch", "Reason", reason) && console.error("Promise:", p));
+process.on("uncaughtException", (err, origin) => logError("Uncaught Exception/Catch", "Error", err) && console.error("Origin:", origin));
+process.on("uncaughtExceptionMonitor", (err, origin) => logError("Uncaught Exception/Catch (MONITOR)", "Error", err) && console.error("Origin:", origin));
+
+process.on("multipleResolves", handleMultipleResolves);
+handleMultipleResolves.warned = false;
 
 let isInit = true;
 let handler = await import('./handler.js');
@@ -662,7 +729,7 @@ async function filesInit() {
     try {
         const pluginsDirectory = path.join(__dirname, 'plugins');
         const pattern = path.join(pluginsDirectory, '**/*.js');
-        const CommandsFiles = getJSFiles(pattern);
+        const CommandsFiles = await glob.sync(pattern);
         const successMessages = [];
         const errorMessages = [];
 
@@ -680,10 +747,10 @@ async function filesInit() {
         }
 
         await conn.reply(nomorown + "@s.whatsapp.net", "*Loaded Plugins Report:*\n" +
-                "\n*Total Plugins:* " + CommandsFiles.length +
-                "\n*Success:* " + successMessages.length +
-                "\n*Error:* " + errorMessages.length +
-                "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n'), null);
+            "\n*Total Plugins:* " + CommandsFiles.length +
+            "\n*Success:* " + successMessages.length +
+            "\n*Error:* " + errorMessages.length +
+            "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n'), null);
 
         conn.logger.warn("Loaded " + CommandsFiles.length + " JS Files total.");
         conn.logger.info("✅ Success Plugins:\n" + successMessages.length + " total.");
@@ -696,79 +763,78 @@ async function filesInit() {
 filesInit()
     .catch(console.error);
 
-function getJSFiles(pattern) {
-    return glob.sync(pattern);
-}
-
-function FileEv(type, file) {
-    const filename = async (file) => file.replace(/^.*[\\\/]/, "");
+async function FileEv(type, file) {
+    const filename = (file) => file.replace(/^.*[\\\/]/, "");
     console.log(file);
-    switch (type) {
-        case "delete":
-            return delete global.plugins[file];
-            break;
-        case "change":
-            try {
-                (async () => {
-                    const module = await import(
-                        `${global.__filename(file)}?update=${Date.now()}`
-                    );
-                    global.plugins[file] = module.default || module;
-                })();
-            } catch (e) {
-                conn.logger.error(
-                    `error require plugin '${filename(file)}\n${format(e)}'`
-                );
-            } finally {
-                global.plugins = Object.fromEntries(
-                    Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
-                );
-            }
-            break;
-        case "add":
-            try {
-                (async () => {
-                    const module = await import(
-                        `${global.__filename(file)}?update=${Date.now()}`
-                    );
-                    global.plugins[file] = module.default || module;
-                })();
-            } catch (e) {
-                conn.logger.error(
-                    `error require plugin '${filename(file)}\n${format(e)}'`
-                );
-            } finally {
-                global.plugins = Object.fromEntries(
-                    Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
-                );
-            }
-            break;
+    try {
+        switch (type) {
+            case "add":
+                conn.logger.info(`new plugin - '${file}'`);
+                break;
+            case "change":
+            case "add":
+                const module = await import(`${global.__filename(file)}?update=${Date.now()}`);
+                global.plugins[file] = module.default || module;
+                conn.logger.info(`updated plugin - '${file}'`);
+                break;
+            case "unlink":
+                delete global.plugins[file];
+                conn.logger.warn(`deleted plugin - '${file}'`);
+                break;
+            default:
+                conn.logger.warn(`unhandled event type - '${type}' for file '${file}'`);
+                break;
+        }
+    } catch (e) {
+        conn.logger.error(`Error requiring plugin '${filename(file)}\n${e.toString()}'`);
+    } finally {
+        global.plugins = Object.fromEntries(
+            Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
+        );
     }
 }
 
-function watchFiles() {
-    let watcher = chokidar.watch("plugins/**/*.js", {
-        ignored: /(^|[\/\\])\../,
-        persistent: true,
-        ignoreInitial: true,
-        alwaysState: true,
-    });
-    const pluginFilter = (filename) => /\.js$/.test(filename);
-    watcher
-        .on("add", (path) => {
-            conn.logger.info(`new plugin - '${path}'`);
-            return FileEv("add", `./${path}`);
-        })
-        .on("change", (path) => {
-            conn.logger.info(`updated plugin - '${path}'`);
-            return FileEv("change", `./${path}`);
-        })
-        .on("unlink", (path) => {
-            conn.logger.warn(`deleted plugin - '${path}'`);
-            return FileEv("delete", `./${path}`);
+async function watchFiles() {
+    try {
+        let watcher = chokidar.watch("plugins/**/*.js", {
+            ignored: /(^|[\/\\])\../,
+            persistent: true,
+            ignoreInitial: true,
+            alwaysState: true,
         });
+
+        watcher
+            .on("add", async (path) => {
+                try {
+                    await FileEv("add", `./${path}`);
+                } catch (err) {
+                    console.error(`Error handling 'add' event for ${path}: ${err.message}`);
+                }
+            })
+            .on("change", async (path) => {
+                try {
+                    await FileEv("change", `./${path}`);
+                } catch (err) {
+                    console.error(`Error handling 'change' event for ${path}: ${err.message}`);
+                }
+            })
+            .on("unlink", async (path) => {
+                try {
+                    await FileEv("unlink", `./${path}`);
+                } catch (err) {
+                    console.error(`Error handling 'unlink' event for ${path}: ${err.message}`);
+                }
+            })
+            .on("error", (error) => {
+                console.error(`Chokidar error: ${error}`);
+            });
+    } catch (err) {
+        console.error(`Error in watchFiles: ${err.message}`);
+    }
 }
+
 watchFiles();
+
 await global.reloadHandler();
 async function _quickTest() {
     const test = await Promise.all([

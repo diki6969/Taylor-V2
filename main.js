@@ -42,6 +42,7 @@ import {
     spawn,
     exec
 } from 'child_process';
+import { execSync } from 'child_process';
 import lodash from 'lodash';
 import chalk from 'chalk';
 import syntaxerror from 'syntax-error';
@@ -417,7 +418,7 @@ async function clearTmp() {
     }
 }
 
-async function clearSessions(folder = "TaylorSession") {
+async function clearSessions(folder = "./TaylorSession") {
     try {
         const filename = readdirSync(folder).filter((file) => {
             try {
@@ -574,61 +575,37 @@ async function connectionUpdate(update) {
     if (receivedPendingNotifications) {
         conn.logger.warn(chalk.yellow("Menunggu Pesan Baru"));
     }
-    if (!pairingCode && !useMobile && !useQr && qr !== 0 && qr !== undefined && connection === "close") {
-        conn.logger.error(chalk.yellow(`\n🚩 Koneksi ditutup, harap hapus folder ${global.authFile} dan pindai ulang kode QR`));
-        // Kill previous processes and restart
-        const killAndRestart = async (killCommand, restartCommand) => {
-            try {
-                await exec(killCommand);
-                const {
-                    stdout
-                } = await exec(restartCommand);
-                console.log(`Restarted successfully: ${stdout}`);
-            } catch (err) {
-                console.error(`Error: ${err.message}`);
-            }
-        };
 
-        killAndRestart('pkill -f "node index.js"', `node index.js ${process.argv.slice(2).join(' ')}`);
-    }
-    if (!pairingCode && !useMobile && useQr && qr !== 0 && qr !== undefined && connection === "close") {
-        conn.logger.info(chalk.yellow('\n🚩ㅤPindai kode QR ini, kode QR akan kedaluwarsa dalam 60 detik.'));
-        // Kill previous processes and restart
-        const killAndRestart = async (killCommand, restartCommand) => {
-            try {
-                await exec(killCommand);
-                const {
-                    stdout
-                } = await exec(restartCommand);
-                console.log(`Restarted successfully: ${stdout}`);
-            } catch (err) {
-                console.error(`Error: ${err.message}`);
-            }
-        };
+if (!pairingCode && !useMobile && qr !== 0 && qr !== undefined && connection === "close") {
+    conn.logger.error(chalk.yellow(`\n🚩 Koneksi ditutup, harap hapus folder ${global.authFile} dan pindai ulang kode QR`));
 
-        killAndRestart('pkill -f "node index.js"', `node index.js ${process.argv.slice(2).join(' ')}`);
+    try {
+        execSync(`pkill -f "node index.js"`);
+        const stdout = execSync(`node index.js ${process.argv.slice(2).join(' ')}`);
+        console.log(`Restarted successfully: ${stdout}`);
+    } catch (err) {
+        console.error(`Error: ${err.message}`);
     }
 }
 
-const logError = (eventType, message, details) => {
-    console.error(`[AntiCrash] :: ${eventType}\n${message}:`, details);
-};
+if (!pairingCode && !useMobile && useQr && qr !== 0 && qr !== undefined && connection === "close") {
+    conn.logger.info(chalk.yellow(`\n🚩ㅤPindai kode QR ini, kode QR akan kedaluwarsa dalam 60 detik.`));
 
-const handleMultipleResolves = (type, promise, reason) => {
-    if (!handleMultipleResolves.warned) {
-        logError("Multiple Resolves", "Type", type);
-        console.warn("Promise:", promise);
-        console.warn("Reason:", reason);
-        handleMultipleResolves.warned = true;
+    try {
+        execSync(`pkill -f "node index.js"`);
+        const stdout = execSync(`node index.js ${process.argv.slice(2).join(' ')}`);
+        console.log(`Restarted successfully: ${stdout}`);
+    } catch (err) {
+        console.error(`Error: ${err.message}`);
     }
-};
+}
 
-process.on("unhandledRejection", (reason, p) => logError("Unhandled Rejection/Catch", "Reason", reason) && console.error("Promise:", p));
-process.on("uncaughtException", (err, origin) => logError("Uncaught Exception/Catch", "Error", err) && console.error("Origin:", origin));
-process.on("uncaughtExceptionMonitor", (err, origin) => logError("Uncaught Exception/Catch (MONITOR)", "Error", err) && console.error("Origin:", origin));
+}
 
-process.on("multipleResolves", handleMultipleResolves);
-handleMultipleResolves.warned = false;
+console.error(chalk.red(`[AntiCrash] :: Unhandled Rejection/Catch\nReason:`), (reason, p) => console.error(chalk.yellow("Promise:"), p));
+console.error(chalk.red(`[AntiCrash] :: Uncaught Exception/Catch\nError:`), (err, origin) => console.error(chalk.yellow("Origin:"), origin));
+console.error(chalk.red(`[AntiCrash] :: Uncaught Exception/Catch (MONITOR)\nError:`), (err, origin) => console.error(chalk.yellow("Origin:"), origin));
+
 
 let isInit = true;
 let handler = await import('./handler.js');
@@ -720,13 +697,14 @@ global.reloadHandler = async function(restatConn) {
 };
 
 global.plugins = {};
-const pluginFilter = (filename) => /\.js$/.test(filename);
 
-const require = createRequire(import.meta.url);
-const glob = require('glob');
+const pluginFilter = (filename) => /\.js$/.test(filename);
 
 async function filesInit() {
     try {
+        const require = createRequire(import.meta.url);
+        const glob = require('glob');
+
         const pluginsDirectory = path.join(__dirname, 'plugins');
         const pattern = path.join(pluginsDirectory, '**/*.js');
         const CommandsFiles = await glob.sync(pattern);
@@ -746,11 +724,14 @@ async function filesInit() {
             }
         }
 
-        await conn.reply(nomorown + "@s.whatsapp.net", "*Loaded Plugins Report:*\n" +
+        await conn.reply(
+            nomorown + "@s.whatsapp.net",
+            "*Loaded Plugins Report:*\n" +
             "\n*Total Plugins:* " + CommandsFiles.length +
             "\n*Success:* " + successMessages.length +
             "\n*Error:* " + errorMessages.length +
-            "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n'), null);
+            "\n*Error List:*\n" + errorMessages.map((v, i) => (i + 1) + ". " + v).join('\n'), null
+        );
 
         conn.logger.warn("Loaded " + CommandsFiles.length + " JS Files total.");
         conn.logger.info("✅ Success Plugins:\n" + successMessages.length + " total.");
@@ -760,8 +741,7 @@ async function filesInit() {
     }
 }
 
-filesInit()
-    .catch(console.error);
+filesInit().catch(console.error);
 
 async function FileEv(type, file) {
     const filename = (file) => file.replace(/^.*[\\\/]/, "");
@@ -794,40 +774,37 @@ async function FileEv(type, file) {
     }
 }
 
+
 async function watchFiles() {
     try {
-        let watcher = chokidar.watch("plugins/**/*.js", {
+    const pluginsPath = "plugins/**/*.js";
+        const watcher = chokidar.watch(pluginsPath, {
             ignored: /(^|[\/\\])\../,
             persistent: true,
             ignoreInitial: true,
             alwaysState: true,
+            awaitWriteFinish: true,
+            useFsEvents: true,
+            atomic: true,
+            awaitWriteFinish: {
+                stabilityThreshold: 2000,
+                pollInterval: 100,
+            },
+            usePolling: true, // Depending on your use case and environment
+            interval: 300,
         });
 
-        watcher
-            .on("add", async (path) => {
+        ['add', 'change', 'unlink'].forEach(eventName =>
+            watcher.on(eventName, async (path) => {
                 try {
-                    await FileEv("add", `./${path}`);
+                    await FileEv(eventName, `./${path}`);
                 } catch (err) {
-                    console.error(`Error handling 'add' event for ${path}: ${err.message}`);
+                    console.error(`Error handling '${eventName}' event for ${path}: ${err.message}`);
                 }
             })
-            .on("change", async (path) => {
-                try {
-                    await FileEv("change", `./${path}`);
-                } catch (err) {
-                    console.error(`Error handling 'change' event for ${path}: ${err.message}`);
-                }
-            })
-            .on("unlink", async (path) => {
-                try {
-                    await FileEv("unlink", `./${path}`);
-                } catch (err) {
-                    console.error(`Error handling 'unlink' event for ${path}: ${err.message}`);
-                }
-            })
-            .on("error", (error) => {
-                console.error(`Chokidar error: ${error}`);
-            });
+        );
+
+        watcher.on("error", (error) => console.error(`Chokidar error: ${error}`));
     } catch (err) {
         console.error(`Error in watchFiles: ${err.message}`);
     }
@@ -837,38 +814,50 @@ watchFiles();
 
 await global.reloadHandler();
 async function _quickTest() {
-    const test = await Promise.all([
-        spawn('ffmpeg'),
-        spawn('ffprobe'),
-        spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-filter_complex', 'color', '-frames:v', '1', '-f', 'webp', '-']),
-        spawn('convert'),
-        spawn('magick'),
-        spawn('gm'),
-        spawn('find', ['--version']),
-    ].map((p) => {
-        return Promise.race([
-            new Promise((resolve) => {
-                p.on('close', (code) => {
-                    resolve(code !== 127);
-                });
-            }),
-            new Promise((resolve) => {
-                p.on('error', (_) => resolve(false));
-            })
-        ]);
-    }));
-    const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test;
-    const s = global.support = {
-        ffmpeg,
-        ffprobe,
-        ffmpegWebp,
-        convert,
-        magick,
-        gm,
-        find
-    };
-    Object.freeze(global.support);
+    const binaries = [
+        'ffmpeg',
+        'ffprobe',
+        ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-filter_complex', 'color', '-frames:v', '1', '-f', 'webp', '-'],
+        'convert',
+        'magick',
+        'gm',
+        ['find', '--version'],
+    ];
+
+    try {
+        const testResults = await Promise.all(binaries.map(async binary => {
+            const [command, ...args] = Array.isArray(binary) ? binary : [binary];
+            const process = spawn(command, args);
+
+            try {
+                const closePromise = new Promise(resolve => process.on('close', code => resolve(code !== 127)));
+                const errorPromise = new Promise(resolve => process.on('error', _ => resolve(false)));
+
+                return await Promise.race([closePromise, errorPromise]);
+            } finally {
+                process.kill();
+            }
+        }));
+
+        const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = testResults;
+        const support = {
+            ffmpeg,
+            ffprobe,
+            ffmpegWebp,
+            convert,
+            magick,
+            gm,
+            find,
+        };
+
+        Object.freeze(global.support = support);
+    } catch (error) {
+        console.error(`Error in _quickTest: ${error.message}`);
+    }
 }
+
+_quickTest();
+
 const actions = [{
         func: clearTmp,
         message: '\nPenyegaran Tempat Penyimpanan Berhasil ✅'
@@ -920,5 +909,3 @@ function clockString(ms) {
     ];
     return units.map(unit => `${unit.value.toString().padStart(2, '0')} ${unit.label}`).join(' ');
 }
-
-_quickTest().catch(console.error);

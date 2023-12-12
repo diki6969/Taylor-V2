@@ -13,7 +13,7 @@ let handler = async (m, {
 		text = args.slice(0).join(" ")
 	} else if (m.quoted && m.quoted.text) {
 		text = m.quoted.text
-	} else return m.reply("Input Teks")
+	} else return m.reply("Use *bard (text)* or *bardimg (text/media)*")
 	let q = m.quoted ? m.quoted : m
 	let mime = (q.msg || q).mimetype || ""
 	await m.reply(wait)
@@ -34,17 +34,17 @@ let handler = async (m, {
 				}
 			}
 		}
-	} else {
+	} else if (mime && command === "bardimg") {
 		let media = await q.download()
 		let isTele = /image\/(png|jpe?g)/.test(mime)
 		let link = await uploadImage(media)
 		let res = await GoogleBardImg(text, link)
 		await m.reply(res.content);
-	}
+	} else return m.reply("Use *bard (text)* or *bardimg (text/media)*")
 }
-handler.help = ["bard"]
+handler.help = ["bard", "bardimg"]
 handler.tags = ["ai"]
-handler.command = /^(bard)$/i
+handler.command = /^(bard|bardimg)$/i
 
 export default handler
 

@@ -1,17 +1,17 @@
-import fetch from 'node-fetch'
-let handler = async (m, {
-    text,
-    command,
-    usedPrefix
-}) => {
-    if (!text) throw `contoh:\n${usedPrefix + command} stikerinbot`
-    let res = await fetch(global.API('https://api.github.com', '/search/repositories', {
-        q: text
-    }))
-    if (!res.ok) throw eror
-    let json = await res.json()
-    let str = json.items.map((repo, index) => {
-        return `>      「 ${ 1 + index } 」       <
+import fetch from 'node-fetch';
+
+let handler = async (m, { text, command, usedPrefix }) => {
+    try {
+        if (!text) throw `Contoh:\n${usedPrefix + command} stikerinbot`;
+
+        let res = await fetch(global.API('https://api.github.com', '/search/repositories', { q: text }));
+
+        if (!res.ok) throw 'Error fetching data from GitHub';
+
+        let json = await res.json();
+
+        let str = json.items.map((repo, index) => `
+>      「 ${1 + index} 」       <
 ɴᴀᴍᴇ ʀᴇᴘᴏ : ${repo.name}
 ʙʏ : ${repo.owner.login}
 ғᴏʀᴋᴇᴅ : ${repo.fork ? 'True' : 'False'}
@@ -26,20 +26,23 @@ ${repo.description}` : ''}
 
 ⑂ ᴄʟᴏɴᴇ :
 $ git clone ${repo.clone_url}
-`.trim()
-    }).join('\n— — — — — — — — — — — — — —\n')
-    //conn.sendButton(m.chat, `*${htki} ɢɪᴛʜᴜʙ sᴇᴀʀᴄʜ ${htka}*\n` + str, botdate, null, json.items.map((repo, index) => { return `${repo.html_url}` }), ['[ 1 ] ʟ ɪ ɴ ᴋ', '[ 2 ] ʟ ɪ ɴ ᴋ', '[ 3 ] ʟ ɪ ɴ ᴋ'], null,null, [[null,null],[null,null],[null,null]],m)
-    conn.sendTemplateButtonDoc(m.chat, null, `*${htki} ɢɪᴛʜᴜʙ sᴇᴀʀᴄʜ ${htka}*\n` + str, wm, null, null, fakes, fakefb)
-}
-handler.help = ['githubsearch'].map(v => v + ' <pencarian>')
-handler.tags = ['internet', 'downloader']
+`.trim()).join('\n— — — — — — — — — — — — — —\n');
 
-handler.command = /^g(ithub|h)s(earch)?$/i
+        await conn.reply(m.chat, `*${htki} ɢɪᴛʜᴜʙ sᴇᴀʀᴄʜ ${htka}*\n` + str, m);
+    } catch (error) {
+        console.error('Error:', error);
+        await m.reply('Terjadi kesalahan saat mencari repository GitHub.');
+    }
+};
 
-export default handler
+handler.help = ['githubsearch'].map(v => v + ' <pencarian>');
+handler.tags = ['internet', 'downloader'];
+handler.command = /^g(ithub|h)s(earch)$/i;
+
+export default handler;
 
 function formatDate(n, locale = 'id') {
-    let d = new Date(n)
+    let d = new Date(n);
     return d.toLocaleDateString(locale, {
         weekday: 'long',
         day: 'numeric',
@@ -47,6 +50,6 @@ function formatDate(n, locale = 'id') {
         year: 'numeric',
         hour: 'numeric',
         minute: 'numeric',
-        second: 'numeric'
-    })
+        second: 'numeric',
+    });
 }

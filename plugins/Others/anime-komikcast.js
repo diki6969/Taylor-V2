@@ -1,98 +1,78 @@
-const KomikCast = await (await import('../../lib/download/komikcast.js')).default;
-const komikCast = new KomikCast();
+const komikCast = await (await import("../../lib/kimoci.js")).default;
+const Comic = new komikCast();
 
-let handler = async (m, {
-    conn,
-    args,
-    usedPrefix,
-    command
-}) => {
-    const commandArgs = args[0] ? args[0].split('|') : null; // Memisahkan perintah dan query
+let handler = async (m, { conn, args, usedPrefix, text, command }) => {
+    let lister = [
+        "search",
+        "chapter",
+        "pdf"
+    ];
 
-    if (!commandArgs || commandArgs.length !== 2) {
-        return conn.reply(m.chat, `
-*Format perintah salah atau tidak valid.*
-
-Gunakan ${usedPrefix}komikcast [search|info|render] [query]
-
-*Contoh Penggunaan:*
-1. ${usedPrefix}komikcast search One Piece
-2. ${usedPrefix}komikcast info One Punch Man
-3. ${usedPrefix}komikcast render Attack on Titan
-        `, m);
+    let [feature, inputs, inputs_] = text.split("|");
+    if (!lister.includes(feature)) {
+        return m.reply("*Contoh:*\n.komikcast search|vpn\n\n*Pilih tipe yang ada*\n" + lister.map((v, index) => "  ○ " + v).join("\n"));
     }
 
-    const [action, query] = commandArgs;
-
-    switch (action) {
-        case 'search':
-            const searchResult = await komikCast.search(query);
-
-            if (searchResult.status) {
-                let replyMsg = 'Hasil Pencarian Komik:\n\n';
-
-                for (const result of searchResult.data) {
-                    replyMsg += `📚 *Title:* ${result.title}\n`;
-                    replyMsg += `📖 *Type:* ${result.type}\n`;
-                    replyMsg += `📃 *Chapter:* ${result.chapter}\n`;
-                    replyMsg += `⭐ *Score:* ${result.score}\n`;
-                    replyMsg += `🔗 *URL:* [Link](${result.url})\n\n`;
-                }
-
-                conn.reply(m.chat, replyMsg, m);
-            } else {
-                conn.reply(m.chat, 'Komik tidak ditemukan atau terjadi kesalahan.', m);
+    if (lister.includes(feature)) {
+        if (feature == "search") {
+            if (!inputs) return m.reply("Masukkan query link\nContoh: .komikcast search|vpn");
+            await m.reply(wait);
+            try {
+                let res = await Comic.search(inputs, { type: inputs_ || '' });
+                let teks = res.data.map((item, index) => {
+                    return `
+*Judul:* ${item.title}
+*Tipe:* ${item.type}
+*Bab:* ${item.chapter}
+*Skor:* ${item.score}
+*URL:* ${item.url}
+                    `;
+                }).filter(v => v).join("\n\n________________________\n\n");
+                await m.reply(teks);
+            } catch (e) {
+                await m.reply(eror);
             }
-            break;
+        }
 
-        case 'info':
-            const komikInfo = await komikCast.fetch(query);
+        if (feature == "chapter") {
+            if (!inputs) return m.reply("Masukkan query link\nContoh: .komikcast chapter|group");
+            await m.reply(wait);
+            try {
+                let res = await Comic.info(inputs);
+                let teks = res.chapters.map((item, index) => {
+                    return `
+*Judul:* ${item.title}
+*URL:* ${item.url}
+*Waktu:* ${item.time}
+                    `;
+                }).filter(v => v).join("\n\n________________________\n\n");
+                await m.reply(teks);
+            } catch (e) {
+                await m.reply(eror);
+            }
+        }
 
-            if (komikInfo.status) {
-                let replyMsg = `*Informasi Komik* 📚\n\n`;
-                replyMsg += `📖 *Title:* ${komikInfo.data.title}\n`;
-                replyMsg += `✍️ *Author:* ${komikInfo.data.author}\n`;
-                replyMsg += `📈 *Status:* ${komikInfo.data.status}\n`;
-                replyMsg += `📃 *Chapter:* ${komikInfo.data.chapter}\n`;
-                replyMsg += `⭐ *Score:* ${komikInfo.data.score}\n`;
-                replyMsg += `🎭 *Genre:* ${komikInfo.data.genre}\n`;
-                replyMsg += `📅 *Updated:* ${komikInfo.data.updated}\n\n`;
-
-                if (komikInfo.data.chapters.length > 0) {
-                    replyMsg += '*Chapter List* 📖\n\n';
-
-                    for (const chapter of komikInfo.data.chapters) {
-                        replyMsg += `📚 *Title:* ${chapter.title}\n`;
-                        replyMsg += `📅 *Release:* ${chapter.release}\n`;
-                        replyMsg += `🔗 *URL:* [Link](${chapter.url})\n\n`;
+        if (feature == "pdf") {
+            if (!inputs) return m.reply("Masukkan query link\nContoh: .komikcast search|group");
+            await m.reply(wait);
+            try {
+                let imagePdf = await Comic.image(inputs);
+                let data = await Comic.imagePdf(imagePdf);
+                
+                await conn.sendFile(m.chat, data, inputs, "SELESAI", m, null, {
+                    mimetype: dpdf,
+                    contextInfo: {
+                        mentionedJid: [m.sender]
                     }
-                }
-
-                conn.reply(m.chat, replyMsg, m);
-            } else {
-                conn.reply(m.chat, 'Tidak dapat mengambil informasi komik atau terjadi kesalahan.', m);
+                });
+            } catch (e) {
+                await m.reply(eror);
             }
-            break;
-
-        case 'render':
-            const renderInfo = await komikCast.render(query);
-
-            if (renderInfo.status) {
-                conn.reply(m.chat, 'Gambar Komik:', m);
-                for (const imageUrl of renderInfo.data) {
-                    conn.sendFile(m.chat, imageUrl, '', '', m);
-                }
-            } else {
-                conn.reply(m.chat, 'Tidak dapat merender komik atau terjadi kesalahan.', m);
-            }
-            break;
-
-        default:
-            conn.reply(m.chat, 'Perintah tidak valid. Gunakan format: [search|info|render] [query]', m);
+        }
     }
-}
+};
 
-handler.help = ["komikcast"]
-handler.tags = ["komik"]
-handler.command = /^komikcast$/i
+handler.help = ["komikcast"];
+handler.tags = ["internet"];
+handler.command = /^(komikcast)$/i;
 export default handler;

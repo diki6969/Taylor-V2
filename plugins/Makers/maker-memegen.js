@@ -12,15 +12,16 @@ let handler = async (m, {
     text,
     command
 }) => {
-    await m.reply(wait)
+    
     let [atas, bawah] = text.split(/[^\w\s]/g)
     let q = m.quoted ? m.quoted : m
     let image = await q.download?.()
     let bg = await uploadImage(image)
     let mime = (q.msg || q).mimetype || q.mediaType || ''
     if (!/image|viewOnce/g.test(mime)) return m.reply(`Reply Media dengan perintah\n\n${usedPrefix + command} <${atas ? atas : 'teks atas'}>|<${bawah ? bawah : 'teks bawah'}>`)
-    let img = await q.download?.()
+    await m.reply(wait)
     try {
+    
         let f = await fetch('https://api.memegen.link/fonts', {
             headers: {
                 'accept': 'application/json'

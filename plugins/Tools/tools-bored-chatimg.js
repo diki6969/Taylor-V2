@@ -4,6 +4,9 @@ import {
     FormData,
     Blob
 } from 'formdata-node';
+import {
+    translate
+} from '@vitalets/google-translate-api'
 
 let handler = async (m, {
     command,
@@ -26,7 +29,12 @@ let handler = async (m, {
         let media = await q.download()
         let isTele = /image\/(png|jpe?g)/.test(mime)
         let link = await uploadImage(media)
-        let result = await WhatImage(link, text)
+        const prompt = (text.trim());
+        let res = await translate(prompt, {
+            to: "en",
+            autoCorrect: true
+        }).catch(_ => null)
+        let result = await WhatImage(link, res.text)
         if (!result) {
             throw 'Terjadi kesalahan saat mengonversi gambar ke zombie.';
         }

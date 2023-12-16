@@ -130,6 +130,7 @@
         "spinnies": "*",
         "syntax-error": "*",
         "terminal-image": "*",
+        "terser": "*",
         "uglify-js": "*",
         "url": "*",
         "url-regex": "*",

@@ -60,7 +60,7 @@ global.xyro = "yqiBQF86F4"
 /*Number*/
 global.nomorbot = "6285609188523"
 global.nomorown = "6282281657946"
-global.namebot = " ᴛᴀyʟᴏʀ-ʙᴏᴛ あ⁩ "
+global.namebot = "IkyyBot"
 global.nameown = "「 𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 」"
 
 /* Random */

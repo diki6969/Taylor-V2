@@ -61,7 +61,7 @@ global.xyro = "yqiBQF86F4"
 global.nomorbot = "6285609188523"
 global.nomorown = "6282281657946"
 global.namebot = "IkyyBot"
-global.nameown = "「 𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 」"
+global.nameown = "「 IkyyOFC 」"
 
 /* Random */
 global.pmenus = pickRandom(["乂", "◈", "➭", "ଓ", "⟆•", "⳻", "•", "↬", "◈", "⭑", "ᯬ", "◉", "᭻", "»", "〆", "々", "⛥", "✗", "⚜", "⚚", "♪"])

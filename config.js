@@ -11,10 +11,10 @@ import moment from "moment-timezone"
 
 /*Oᴡɴᴇʀ number*/
 global.owner = [
-    ["6282195322106", "️𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 - 𝑶𝒘𝒏𝒆𝒓", true]
+    ["6282281657946", "️𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 - 𝑶𝒘𝒏𝒆𝒓", true]
 ]
-global.mods = ["6282195322106"]
-global.prems = ["6282195322106"]
+global.mods = ["6282281657946"]
+global.prems = ["6282281657946"]
 
 /*Website*/
 global.APIs = {
@@ -59,7 +59,7 @@ global.xyro = "yqiBQF86F4"
 
 /*Number*/
 global.nomorbot = "6285171216276"
-global.nomorown = "6282195322106"
+global.nomorown = "6282281657946"
 global.namebot = " ᴛᴀyʟᴏʀ-ʙᴏᴛ あ⁩ "
 global.nameown = "「 𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 」"
 
@@ -1076,7 +1076,7 @@ function ThumbUrl() {
 
 /* Fake Reply */
 function Fakes() {
-    let Org = pickRandom(["0", "628561122343", "6288906250517", "6282195322106", "6281119568305", "6281282722861", "6282112790446"])
+    let Org = pickRandom(["0", "628561122343", "6288906250517", "6282281657946", "6281119568305", "6281282722861", "6282112790446"])
     let Parti = pickRandom([Org + "@s.whatsapp.net", Org + "@c.us"])
     let Remot = pickRandom(["status@broadcast", "120363047752200594@g.us"])
     let Hai = pickRandom(["Apa kabar ", "Halo ", "Hai "])

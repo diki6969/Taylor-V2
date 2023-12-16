@@ -171,7 +171,7 @@ global.povo = "089514509029"
 global.pgopay = "089514509029"
 global.ppulsa = "089514509029"
 global.ppulsa2 = "089514509029"
-global.psaweria = "https://saweria.com/Wudysoft"
+global.psaweria = "https://saweria.com/IkyyOFC"
 
 /* Fake adReplyS*/
 global.adReplyS = {

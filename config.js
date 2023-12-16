@@ -146,9 +146,9 @@ global.cmenub = "│" + pmenus
 global.cmenuf = "╰──────────⳹"
 global.cmenua = "\n⌕ ❙❘❙❙❘❙❚❙❘❙❙❚❙❘❙❘❙❚❙❘❙❙❚❙❘❙❙❘❙❚❙❘ ⌕\n     "
 global.emojis = pickRandom(["👑", "🎗", "️🗿", "🕹", "️💡", "🪄", "🎈", "🎊", "🔖", "📍", "❤", "‍🔥", "💤", "💭", "🕚", "💬", "🚩", "🎐", "🍃", "🌿", "🥀", "✨", "⚡", "☂️"])
-global.packname = "𝑴𝒂𝒅𝒆 𝒃𝒚"
+global.packname = "Made By"
 global.stickpack = packname
-global.author = "𝑻𝒂𝒚𝒍𝒐𝒓 乂 𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕"
+global.author = "IkyyBot\nIkyyOFC"
 global.stickauth = author + "\nwa.me/" + nomorbot
 global.multiplier = 69
 

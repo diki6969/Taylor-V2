@@ -68,7 +68,7 @@ global.pmenus = pickRandom(["乂", "◈", "➭", "ଓ", "⟆•", "⳻", "•", 
 global.htjava = pickRandom(["乂", "⛶", "❏", "⫹⫺", "☰", "⎔", "✦", "⭔", "⬟", "⛊", "⚝"])
 
 /*Watermark*/
-global.wm = "                「 ᴛᴀyʟᴏʀ-ʙᴏᴛ あ⁩ 」"
+global.wm = "                「IkyyBot」"
 global.wm2 = "꒷︶꒷꒥꒷ ‧₊˚ ꒰ฅ˘օառɛʀ˘ฅ ꒱ ‧₊˚꒷︶꒷꒥꒷"
 global.wm3 = htjava + " ᴛᴀyʟᴏʀ-ʙᴏᴛ"
 global.botdate = `${htjava} Date :  ${moment.tz("Asia/Makassar").format("DD/MM/YY")}`

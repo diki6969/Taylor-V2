@@ -11,7 +11,7 @@ import moment from "moment-timezone"
 
 /*Oᴡɴᴇʀ number*/
 global.owner = [
-    ["6282281657946", "️𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 - 𝑶𝒘𝒏𝒆𝒓", true]
+    ["6282281657946", "️IkyyOFC", true]
 ]
 global.mods = ["6282281657946"]
 global.prems = ["6282281657946"]

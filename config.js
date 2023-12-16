@@ -160,7 +160,7 @@ global.webs = "https://s.id/Cerdasin62"
 global.gcwangsaf = "https://chat.whatsapp.com/LqJoQr4IdBLAXsxd1PkNph"
 
 /*Donasi*/
-global.saweria = "https://saweria.com/wudysoft"
+global.saweria = "https://saweria.com/IkyyOFC"
 global.dana = "0887435373103"
 global.pulsa = "082195322106"
 global.trakteer = "https://trakteer.id/wudysoft"

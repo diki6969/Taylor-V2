@@ -70,7 +70,7 @@ global.htjava = pickRandom(["乂", "⛶", "❏", "⫹⫺", "☰", "⎔", "✦", 
 /*Watermark*/
 global.wm = "                「IkyyBot」"
 global.wm2 = "꒷︶꒷꒥꒷ ‧₊˚ ꒰ฅ˘օառɛʀ˘ฅ ꒱ ‧₊˚꒷︶꒷꒥꒷"
-global.wm3 = htjava + " ᴛᴀyʟᴏʀ-ʙᴏᴛ"
+global.wm3 = htjava + "IkyyBot"
 global.botdate = `${htjava} Date :  ${moment.tz("Asia/Makassar").format("DD/MM/YY")}`
 global.bottime = `𝗧 𝗜 𝗠 𝗘 : ${moment.tz("Asia/Makassar").format("HH:mm:ss")}`
 global.titlebot = `${htjava} Time Sever : ${moment.tz("Asia/Makassar").format("HH:mm:ss")}\n⫹⫺ Date Server :  ${moment.tz("Asia/Makassar").format("DD/MM/YY")}`

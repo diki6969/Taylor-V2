@@ -58,7 +58,7 @@ global.ameapikey = "1f98ec7e4842d057d7551722f83e9ae5c59896856aa3f96d406ff8fc9185
 global.xyro = "yqiBQF86F4"
 
 /*Number*/
-global.nomorbot = "6285171216276"
+global.nomorbot = "6285609188523"
 global.nomorown = "6282281657946"
 global.namebot = " ᴛᴀyʟᴏʀ-ʙᴏᴛ あ⁩ "
 global.nameown = "「 𝑾𝒖𝒅𝒚𝒔𝒐𝒇𝒕 」"

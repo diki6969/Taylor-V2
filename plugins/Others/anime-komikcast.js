@@ -1,4 +1,4 @@
-const komikCast = await (await import("../../lib/kimoci.js")).default;
+const komikCast = await (await import("../../lib/download/komikcast.js")).default;
 const Comic = new komikCast();
 
 let handler = async (m, { conn, args, usedPrefix, text, command }) => {

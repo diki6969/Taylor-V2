@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 let handler = async (m, {
     conn,
@@ -11,7 +11,8 @@ let handler = async (m, {
 
     let lister = [
         "search",
-        "gif"
+        "gif",
+        "vid"
     ]
 
     let [feature, inputs, inputs_, inputs__, inputs___] = text.split("|")
@@ -53,6 +54,22 @@ let handler = async (m, {
                 await m.reply(eror)
             }
         }
+        if (feature == "vid") {
+            if (!inputs) return m.reply("Input query")
+            try {
+                let res = await getVideo(inputs)
+                let teks = res.mediaDefinitions.map((item, index) => {
+                    return `*[ RESULT ${index + 1} ]*
+*format:* ${item.format}
+*quality:* ${item.quality}
+*videoUrl:* ${item.videoUrl}
+`
+                }).filter(v => v).join("\n\n________________________\n\n")
+                await m.reply(teks)
+            } catch (e) {
+                await m.reply(eror)
+            }
+        }
 
     }
 }
@@ -64,33 +81,42 @@ export default handler
 /* New Line */
 async function searchVideo(query) {
     const url = `https://www.pornhub.com/video/search?search=${query}`;
-    const response = await fetch(url);
-    const html = await response.text();
-    const $ = cheerio.load(html);
+    
+    try {
+        const response = await axios.get(url);
+        const $ = cheerio.load(response.data);
 
-    const videoList = [];
+        return $('li[data-video-segment]').map((i, el) => {
+            const $el = $(el);
 
-    $('li[data-video-segment]').each((index, element) => {
-        const $element = $(element);
+            return {
+                link: "https://www.pornhub.com" + $el.find('.title a').attr('href').trim(),
+                title: $el.find('.title a').text().trim(),
+                uploader: $el.find('.videoUploaderBlock a').text().trim(),
+                views: $el.find('.views').text().trim(),
+                duration: $el.find('.duration').text().trim(),
+            };
+        }).get();
+    } catch (error) {
+        console.error('Error:', error.message);
+        return [];
+    }
+}
 
-        const link = $element.find('.title a').attr('href').trim();
-        const title = $element.find('.title a').text().trim();
-        const uploader = $element.find('.videoUploaderBlock a').text().trim();
-        const views = $element.find('.views').text().trim();
-        const duration = $element.find('.duration').text().trim();
-
-        const videoData = {
-            link: "https://www.pornhub.com" + link,
-            title: title,
-            uploader: uploader,
-            views: views,
-            duration: duration
-        };
-
-        videoList.push(videoData);
-    });
-
-    return videoList;
+async function getVideo(url) {
+  try {
+    const response = await axios.get(url);
+    const html = response.data;
+    const getSubstring = (startPattern, endPattern) => {
+      const startIndex = html.search(startPattern);
+      return html.substring(startIndex, html.indexOf(endPattern, startIndex));
+    };
+    const metaPayload = getSubstring(/var flashvars_\d{1,} = /, ';\n');
+    return JSON.parse(metaPayload.substring(metaPayload.indexOf('{')));
+  } catch (error) {
+    console.error('Error fetching or parsing data:', error);
+    return null;
+  }
 }
 
 async function searchGif(query) {
